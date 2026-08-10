@@ -48,8 +48,8 @@ A structured student-model update the agent emits; a validator accepts, rejects,
 _Avoid_: free profile write, “the model remembers”
 
 **Evidence brief**:
-A short structured residue of conversation moments that justify a teaching-profile (or mastery) change — better audit than raw transcript-as-memory. Stored in the learner’s student-model store.
-_Avoid_: full chat log as the model
+A short structured audit of conversation moments that justify one **validated proposal** (teaching-profile or mastery) — sibling of the **session summary**, not embedded in it and not a transcript. Exactly one brief per emitted proposal; each brief holds up to a few typed moments (kind + short note + optional learner-only quote). Absent when no proposal is emitted.
+_Avoid_: full chat log as the model, free-form essay justification, tutor quotes as evidence
 
 **Session summary**:
 Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs. Session goals live here (or at loop start), not in the teaching profile. Stored in the learner’s student-model store.
