@@ -36,8 +36,8 @@ Umbrella for everything durable about a learner: mastery/gaps and the teaching p
 _Avoid_: memory (unqualified), weights (as neural nets)
 
 **Teaching profile**:
-Scored parameters inside the student model that the agent loads to adapt responses. Updated only via validated proposals. Informal shorthand: “weights” — not fine-tunes.
-_Avoid_: per-student fine-tune, LoRA, neural weights
+Finite set of scored, course-agnostic parameters inside the student model that the agent loads to adapt *how* it teaches (presentation, scaffolding, light background). Shared 0.0–1.0 scale; untouched dimensions default to 0.5. Updated only via validated proposals. Informal shorthand: “weights” — not fine-tunes. Not mastery, session goals, affect, or learning-style inventories.
+_Avoid_: per-student fine-tune, LoRA, neural weights, VARK, learning style
 
 **Validated proposal**:
 A structured student-model update the agent emits; a validator accepts, rejects, or decays it before persistence.
@@ -48,12 +48,12 @@ A short structured residue of conversation moments that justify a teaching-profi
 _Avoid_: full chat log as the model
 
 **Session summary**:
-Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs.
+Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs. Session goals live here (or at loop start), not in the teaching profile.
 _Avoid_: transcript dump
 
 **Workspace artifact**:
 Files the harness writes into the student’s local workspace as part of teaching (exercises, examples, etc.). First-class beside chat.
 
 **Bootstrap config**:
-Tiny initial student-model values (language, course, a few prefs) collected up front; adaptation continues via validated proposals.
+Tiny per-student initial values collected up front (language, active course pack, optional short questions to seed the teaching profile). Adaptation continues via validated proposals — bootstrap is not a one-time global system setting.
 _Avoid_: long intake questionnaire

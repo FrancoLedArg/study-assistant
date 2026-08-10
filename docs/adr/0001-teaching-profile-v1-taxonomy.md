@@ -1,0 +1,3 @@
+# v1 teaching-profile taxonomy and bootstrap
+
+Study OS locks a finite, course-agnostic **teaching profile**: seven scored dimensions on a shared **0.0–1.0** scale (default **0.5**), updated only via **validated proposals**. **Bootstrap config** stays tiny (language, active course pack, optional short questions to seed profile values). Session goals and affect stay out of the durable profile; VARK/cognitive-style inventories, interests overlays, and a separate learning-strategies family are out of v1. Mastery/gaps remain a separate course-tied model. Informed by ITS primary-source research (`docs/research/its-learner-models.md`) but deliberately smaller than the full candidate set.
