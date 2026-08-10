@@ -32,8 +32,12 @@ The unit of course content loaded for a subject (materials, metadata, teaching c
 _Avoid_: plugin repo, five-repo course system
 
 **Student model**:
-Umbrella for everything durable about a learner: mastery/gaps and the teaching profile. Stored remotely. Not a chat log.
+Umbrella for everything durable about a learner: mastery/gaps and the teaching profile. Lives in the learner’s **student-model store** (local, user-owned) — not an operator-hosted remote. Not a chat log.
 _Avoid_: memory (unqualified), weights (as neural nets)
+
+**Student-model store**:
+The durable local home of one learner’s student model and related residue (session summaries, evidence briefs). Lives outside any single course-pack workspace; the harness is configured to point at it. One store per learner.
+_Avoid_: remote student DB, shared multi-tenant profile server, model files trapped inside one project folder
 
 **Teaching profile**:
 Finite set of scored, course-agnostic parameters inside the student model that the agent loads to adapt *how* it teaches (presentation, scaffolding, light background). Shared 0.0–1.0 scale; untouched dimensions default to 0.5. Updated only via validated proposals. Informal shorthand: “weights” — not fine-tunes. Not mastery, session goals, affect, or learning-style inventories.
@@ -44,11 +48,11 @@ A structured student-model update the agent emits; a validator accepts, rejects,
 _Avoid_: free profile write, “the model remembers”
 
 **Evidence brief**:
-A short structured residue of conversation moments that justify a teaching-profile (or mastery) change — better audit than raw transcript-as-memory.
+A short structured residue of conversation moments that justify a teaching-profile (or mastery) change — better audit than raw transcript-as-memory. Stored in the learner’s student-model store.
 _Avoid_: full chat log as the model
 
 **Session summary**:
-Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs. Session goals live here (or at loop start), not in the teaching profile.
+Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs. Session goals live here (or at loop start), not in the teaching profile. Stored in the learner’s student-model store.
 _Avoid_: transcript dump
 
 **Workspace artifact**:
