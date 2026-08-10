@@ -28,8 +28,8 @@ Non-cátedra material reached only through explicit tools (with allowlists), nev
 _Avoid_: “the model just knows”
 
 **Course pack**:
-The unit of course content loaded for a subject (materials, metadata, teaching config). Lives locally in the workspace. Subject logic is not hard-coded in the core.
-_Avoid_: plugin repo, five-repo course system
+The unit of course content for a subject: cátedra sources, pack metadata, optional course teaching config, and optional mastery/KC definitions. Lives under `course-packs/<pack-id>/` in the workspace (id = folder name; human label = display name). Not learner state — that stays in the student-model store. Subject logic is not hard-coded in the core.
+_Avoid_: plugin repo, five-repo course system, pack-as-student-DB
 
 **Student model**:
 Umbrella for everything durable about a learner: mastery/gaps and the teaching profile. Lives in the learner’s **student-model store** (local, user-owned) — not an operator-hosted remote. Not a chat log.
