@@ -68,8 +68,8 @@ A short structured audit of conversation moments that justify one **validated pr
 _Avoid_: full chat log as the model, free-form essay justification, tutor quotes as evidence, brief-as-scoring-rubric
 
 **Session summary**:
-Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs. Session goals live here (or at loop start), not in the teaching profile. Stored in the learner’s student-model store.
-_Avoid_: transcript dump
+Structured residue of every **tutor loop**, stored in the **student-model store**. v1 fields: id, started/ended times, active **course pack** id, short session goal(s), short outcome, **workspace artifact** paths touched, ids of **validated proposals** and **evidence briefs** from the loop, optional short notes. **Evidence briefs** and proposal bodies stay as siblings — not embedded. Not a transcript; not a dump of the full **teaching profile** or mastery scores. Written even when no proposal is emitted. The next loop loads the current **student model** plus the latest summary for the active pack (and up to a few recent ones if needed).
+_Avoid_: transcript dump, profile/mastery mirror, brief bodies inlined in the summary
 
 **Workspace artifact**:
 Files the harness writes into the student’s local workspace as part of teaching (exercises, examples, etc.). First-class beside chat. The guaranteed practice path when no live **subject runtime** is available.
