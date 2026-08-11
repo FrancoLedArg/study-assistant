@@ -24,8 +24,12 @@ Material from the course/professor (PDFs, notes, slides, exams, assignments). Ta
 _Avoid_: “course PDF” as the only form
 
 **External source**:
-Non-cátedra material reached only through explicit tools (with allowlists), never silent model recall, and always distinguished from cátedra.
-_Avoid_: “the model just knows”
+Non-cátedra material reached only through an explicit **web search** tool after a **cátedra miss** (or explicit learner request), filtered by an **allowlist** of domains/URL prefixes (harness-global defaults plus optional per-pack allow/deny overlays). Always labeled as external (type + URL/title); never silent model recall; never written into pack `sources/` as if it were cátedra. v1 has no Fetch-URL / page-scrape tool.
+_Avoid_: “the model just knows”, whole-web access, autonomous HTML fetch (v1)
+
+**Cátedra miss**:
+Precondition for external web search: the tutor loop has searched the active pack’s `sources/` and found no adequate hit for the need — or the learner explicitly asks to go outside cátedra. Not a durable store record; a loop gate before external tools may run.
+_Avoid_: silent miss, skip-cátedra-by-default
 
 **Course pack**:
 The unit of course content for a subject: cátedra sources, pack metadata, optional course teaching config, and optional mastery/KC definitions. Lives under `course-packs/<pack-id>/` in the workspace (id = folder name; human label = display name). Not learner state — that stays in the student-model store. Subject logic is not hard-coded in the core.
