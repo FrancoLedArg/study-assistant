@@ -32,8 +32,20 @@ The unit of course content for a subject: cátedra sources, pack metadata, optio
 _Avoid_: plugin repo, five-repo course system, pack-as-student-DB
 
 **Student model**:
-Umbrella for everything durable about a learner: mastery/gaps and the teaching profile. Lives in the learner’s **student-model store** (local, user-owned) — not an operator-hosted remote. Not a chat log.
+Umbrella for everything durable about a learner: per–course-pack mastery scores and the teaching profile. Lives in the learner’s **student-model store** (local, user-owned) — not an operator-hosted remote. Not a chat log.
 _Avoid_: memory (unqualified), weights (as neural nets)
+
+**Knowledge component**:
+A pack-authored unit of course competence: stable id, human label, and short description of what “mastered” means. Definitions live in the course pack’s `mastery.yaml`; the learner’s score for that unit (if any) lives in the student-model store, keyed by pack id then knowledge-component id. Flat list only — no prerequisite graph in the model. Diagnostic “bracket below” probing is tutor-loop judgment plus cátedra, not stored edges.
+_Avoid_: free topic tag, module (as synonym for a KC), knowledge-graph node, syllabus unit (as the only grain)
+
+**Mastery score**:
+A 0.0–1.0 value for one knowledge component in one course pack. Absent until first evidence — never auto-defaulted to 0.5 or 0.0. Updated only via validated proposals, which may raise or lower and may target only ids listed in that pack’s `mastery.yaml`. No locked numeric “mastered” threshold in the schema.
+_Avoid_: BKT parameter set, discrete mastery level enum (as the v1 store), global KC id across packs
+
+**Gap**:
+Informal name for low or missing mastery on a knowledge component (plus live diagnosis in the tutor loop). Not a separate durable record beside mastery scores. Durable misconception / wrong-knowledge lists are out of v1.
+_Avoid_: gap entity, bug library, misconception store (v1)
 
 **Student-model store**:
 The durable local home of one learner’s student model and related residue (session summaries, evidence briefs). Lives outside any single course-pack workspace; the harness is configured to point at it. One store per learner.
