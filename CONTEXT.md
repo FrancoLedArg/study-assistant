@@ -40,7 +40,7 @@ A pack-authored unit of course competence: stable id, human label, and short des
 _Avoid_: free topic tag, module (as synonym for a KC), knowledge-graph node, syllabus unit (as the only grain)
 
 **Mastery score**:
-A 0.0–1.0 value for one knowledge component in one course pack. Absent until first evidence — never auto-defaulted to 0.5 or 0.0. Updated only via validated proposals, which may raise or lower and may target only ids listed in that pack’s `mastery.yaml`. No locked numeric “mastered” threshold in the schema.
+A 0.0–1.0 value for one knowledge component in one course pack. Absent until first evidence — never auto-defaulted to 0.5 or 0.0. Updated only via validated proposals, which may raise or lower and may target only ids listed in that pack’s `mastery.yaml`. The first write on an absent KC may set an absolute 0–1 value; later updates use the normal per-proposal step cap. No locked numeric “mastered” threshold in the schema.
 _Avoid_: BKT parameter set, discrete mastery level enum (as the v1 store), global KC id across packs
 
 **Gap**:
@@ -56,12 +56,12 @@ Finite set of scored, course-agnostic parameters inside the student model that t
 _Avoid_: per-student fine-tune, LoRA, neural weights, VARK, learning style
 
 **Validated proposal**:
-A structured student-model update the agent emits; a validator accepts, rejects, or decays it before persistence.
-_Avoid_: free profile write, “the model remembers”
+A structured student-model update the agent emits; a validator **accepts**, **rejects**, or **decays** it before applying any score change. Decay means shrink an oversized |\Δ| to the max step (then clamp into 0.0–1.0), not time-based score fading. Hard rejects cover illegal targets, missing/malformed evidence briefs, and out-of-range absolute seeds. Rejected proposals are still stored (with their brief) without applying the delta. Same-target accepts in one session are last-wins; accepts are rate-limited per tutor loop.
+_Avoid_: free profile write, “the model remembers”, judgmental evidence grading, between-session auto-decay
 
 **Evidence brief**:
-A short structured audit of conversation moments that justify one **validated proposal** (teaching-profile or mastery) — sibling of the **session summary**, not embedded in it and not a transcript. Exactly one brief per emitted proposal; each brief holds up to a few typed moments (kind + short note + optional learner-only quote). Absent when no proposal is emitted.
-_Avoid_: full chat log as the model, free-form essay justification, tutor quotes as evidence
+A short structured audit of conversation moments that justify one **validated proposal** (teaching-profile or mastery) — sibling of the **session summary**, not embedded in it and not a transcript. Exactly one brief per emitted proposal; each brief holds up to a few typed moments (kind + short note + optional learner-only quote). Absent when no proposal is emitted. For the validator it is a **presence/schema gate only** — moment contents do not decide accept vs reject.
+_Avoid_: full chat log as the model, free-form essay justification, tutor quotes as evidence, brief-as-scoring-rubric
 
 **Session summary**:
 Structured residue of a tutor loop: what was attempted, outcome, artifacts touched — alongside model deltas and evidence briefs. Session goals live here (or at loop start), not in the teaching profile. Stored in the learner’s student-model store.
@@ -79,5 +79,5 @@ The learner’s durable choice of which **subject runtime** they use, kept in th
 _Avoid_: pack-embedded install path, global multi-subject detect matrix, harness-owned package install
 
 **Bootstrap config**:
-Tiny per-student initial values collected up front (language, active course pack, optional short questions to seed the teaching profile). Adaptation continues via validated proposals — bootstrap is not a one-time global system setting.
+Tiny per-student initial values collected up front (language, active course pack, optional short questions to seed the teaching profile). Bootstrap seeding may set absolute teaching-profile values; later profile updates use the normal per-proposal step cap. Adaptation continues via validated proposals — bootstrap is not a one-time global system setting.
 _Avoid_: long intake questionnaire
