@@ -68,7 +68,15 @@ Structured residue of a tutor loop: what was attempted, outcome, artifacts touch
 _Avoid_: transcript dump
 
 **Workspace artifact**:
-Files the harness writes into the student’s local workspace as part of teaching (exercises, examples, etc.). First-class beside chat.
+Files the harness writes into the student’s local workspace as part of teaching (exercises, examples, etc.). First-class beside chat. The guaranteed practice path when no live **subject runtime** is available.
+
+**Subject runtime**:
+An installed external program or engine the tutor loop may use for live practice (e.g. a SQL CLI), distinct from **workspace artifacts**. Optional and opportunistic — never required for a loop to complete; the harness does not install or provision it.
+_Avoid_: tool matrix, SQL console (as product pillar), required pack dependency
+
+**Runtime registration**:
+The learner’s durable choice of which **subject runtime** they use, kept in the **student-model store** / harness-facing learner config — not in the course pack. Live practice probes this registration (including in-session re-check after the learner says it is ready). A pack may only declare a technology preference that guides suggestion/default; registration wins when both disagree. Missing or absent registration → artifacts (+ suggest install; no harness install flow).
+_Avoid_: pack-embedded install path, global multi-subject detect matrix, harness-owned package install
 
 **Bootstrap config**:
 Tiny per-student initial values collected up front (language, active course pack, optional short questions to seed the teaching profile). Adaptation continues via validated proposals — bootstrap is not a one-time global system setting.
