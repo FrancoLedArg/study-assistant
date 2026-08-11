@@ -9,11 +9,11 @@ The product: an agent harness that turns an LLM client into a course-faithful tu
 _Avoid_: chatbot, learning OS (as a build plan), GPT tutor
 
 **Agent harness**:
-The system an LLM client plugs into (MCP + tools/skills). It is the v1 product surface. First users are the operator and MCP-capable peers only.
-_Avoid_: Learning API (as the center), web app (as v1)
+The system an LLM client plugs into (MCP + tools/skills). It is the v1 product surface. First users are the operator and MCP-capable peers only. **Tools** do I/O (load context, cátedra search/read, allowlisted web search, workspace artifacts, subject-runtime probe/run, submit validated proposal + evidence brief, session summary read/write). **Skills** choreograph the tutor loop and teaching rules — they are not I/O. v1 locks a closed capability set for one complete tutor loop on one course pack; exact tool names and full skill prose are implementation detail.
+_Avoid_: Learning API (as the center), web app (as v1), unbounded tool matrix, teach-as-a-tool
 
 **Tutor loop**:
-One study engagement: load course context and student model → teach → optional workspace artifacts → emit validated proposals (and evidence) before exit.
+One study engagement: load course context and student model → teach → optional workspace artifacts → emit validated proposals (and evidence) before exit. Choreographed by harness skills; durable writes to the student model go only through validated proposals.
 _Avoid_: chat session (as synonym for memory)
 
 **Course-faithful**:
