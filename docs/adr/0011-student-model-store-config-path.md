@@ -1,0 +1,3 @@
+# Student-model store config path
+
+Study OS locks how the **agent harness** finds the learner’s **student-model store**. v1: config key `student_model_store` in `~/.study-os/config.yaml`, optional env override `STUDY_OS_STUDENT_MODEL_STORE`, default file `~/.study-os/student-model.sqlite` (tilde-expanded). Precedence: env → config file → default. If the path is set but the SQLite file is missing, create an empty store (and parent dirs as needed) so a first run does not cold-fail. Rejected: workspace-only pointers (new folder resets the learner), XDG/`Library/Application Support` as the locked default, and fail-until-manual-init.
