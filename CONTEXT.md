@@ -78,9 +78,17 @@ Files the harness writes into the student’s local workspace as part of teachin
 An installed external program or engine the tutor loop may use for live practice (e.g. a SQL CLI), distinct from **workspace artifacts**. Optional and opportunistic — never required for a loop to complete; the harness does not install or provision it.
 _Avoid_: tool matrix, SQL console (as product pillar), required pack dependency
 
+**Technology family**:
+A stable id for a class of practice engines the learner may register once (v1: `sql`). Course packs declare a preference for a family; registration is keyed by family, not by pack and not learner-global across all subjects.
+_Avoid_: open-ended tool category taxonomy, per-pack-only runtime identity
+
 **Runtime registration**:
-The learner’s durable choice of which **subject runtime** they use, kept in the **student-model store** / harness-facing learner config — not in the course pack. Live practice probes this registration (including in-session re-check after the learner says it is ready). A pack may only declare a technology preference that guides suggestion/default; registration wins when both disagree. Missing or absent registration → artifacts (+ suggest install; no harness install flow).
-_Avoid_: pack-embedded install path, global multi-subject detect matrix, harness-owned package install
+The learner’s durable choice of which **subject runtime** to use for one **technology family**, stored in the **student-model store** (not harness config YAML, not the course pack). v1 fields: `family`, `engine` (closed id), `command` (executable name or absolute path). No connection strings, hosts, or passwords in v1. Pack technology preference guides suggestion only; registration wins when they disagree. Missing, unknown engine, or failed **probe** → artifacts (+ suggest install; no harness install flow).
+_Avoid_: pack-embedded install path, global multi-subject detect matrix, harness-owned package install, DSN-in-registration
+
+**Probe**:
+A harness check that a **runtime registration** is usable: resolve `command` and run a cheap version/help invocation. Not a database server login. May re-run in-session after the learner says the runtime is ready.
+_Avoid_: TCP/DSN connectivity test (v1), scanning an open tool matrix
 
 **Bootstrap config**:
 Tiny per-student initial values collected up front (language, active course pack, optional short questions to seed the teaching profile). Bootstrap seeding may set absolute teaching-profile values; later profile updates use the normal per-proposal step cap. Adaptation continues via validated proposals — bootstrap is not a one-time global system setting.
