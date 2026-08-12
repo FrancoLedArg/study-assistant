@@ -52,7 +52,7 @@ Informal name for low or missing mastery on a knowledge component (plus live dia
 _Avoid_: gap entity, bug library, misconception store (v1)
 
 **Student-model store**:
-The durable local home of one learner’s student model and related residue (session summaries, evidence briefs). Lives outside any single course-pack workspace; the harness is configured to point at it. One store per learner.
+The durable local home of one learner’s student model and related residue (session summaries, evidence briefs). Lives outside any single course-pack workspace. The harness points at it via `student_model_store` (optional env override; default under `~/.study-os/` so a new workspace does not reset the learner). One store per learner.
 _Avoid_: remote student DB, shared multi-tenant profile server, model files trapped inside one project folder
 
 **Teaching profile**:
