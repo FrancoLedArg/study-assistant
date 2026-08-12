@@ -9,7 +9,7 @@ The product: an agent harness that turns an LLM client into a course-faithful tu
 _Avoid_: chatbot, learning OS (as a build plan), GPT tutor
 
 **Agent harness**:
-The system an LLM client plugs into (MCP + tools/skills). It is the v1 product surface. First users are the operator and MCP-capable peers only. **Tools** do I/O (load context, cátedra search/read, allowlisted web search, workspace artifacts, subject-runtime probe/run, submit validated proposal + evidence brief, session summary read/write). **Skills** choreograph the tutor loop and teaching rules — they are not I/O. v1 locks a closed capability set for one complete tutor loop on one course pack; exact tool names and full skill prose are implementation detail.
+The system an LLM client plugs into (MCP + tools/skills). It is the v1 product surface. First users are the operator and MCP-capable peers only. **Tools** do I/O (load context, list/set **active course pack**, cátedra search/read, allowlisted web search, workspace artifacts, subject-runtime probe/run, submit validated proposal + evidence brief, session summary read/write). **Skills** choreograph the tutor loop and teaching rules — they are not I/O. v1 locks a closed capability set for one complete tutor loop on one course pack; exact tool names and full skill prose are implementation detail.
 _Avoid_: Learning API (as the center), web app (as v1), unbounded tool matrix, teach-as-a-tool
 
 **Tutor loop**:
@@ -32,8 +32,12 @@ Precondition for external web search: the tutor loop has searched the active pac
 _Avoid_: silent miss, skip-cátedra-by-default
 
 **Course pack**:
-The unit of course content for a subject: cátedra sources, pack metadata, optional course teaching config, and optional mastery/KC definitions. Lives under `course-packs/<pack-id>/` in the workspace (id = folder name; human label = display name). Not learner state — that stays in the student-model store. Subject logic is not hard-coded in the core.
-_Avoid_: plugin repo, five-repo course system, pack-as-student-DB
+The unit of course content for a subject: cátedra sources, pack metadata, optional course teaching config, and optional mastery/KC definitions. Lives under `course-packs/<pack-id>/` in the workspace (id = folder name; human label = display name). Multiple packs = sibling dirs under `course-packs/`; discovery is a directory scan of folders that have `pack.yaml`. Not learner state — that stays in the student-model store. Subject logic is not hard-coded in the core.
+_Avoid_: plugin repo, five-repo course system, pack-as-student-DB, central pack registry file
+
+**Active course pack**:
+The pack id the next **tutor loop** teaches against. Durable in the **student-model store** (bootstrap / learner prefs), not in harness config YAML. Changes only **between** tutor loops (not mid-loop), via a harness list/set tool when the learner chooses. If the stored id is missing or invalid: use the sole valid pack when exactly one exists (and persist); if zero or many without a valid selection, ask the learner to choose before cátedra teaching — never invent an id.
+_Avoid_: mid-loop pack switch, silent multi-pack default, workspace-only active-pack file as the source of truth
 
 **Student model**:
 Umbrella for everything durable about a learner: per–course-pack mastery scores and the teaching profile. Lives in the learner’s **student-model store** (local, user-owned) — not an operator-hosted remote. Not a chat log.
@@ -91,5 +95,5 @@ A harness check that a **runtime registration** is usable: resolve `command` and
 _Avoid_: TCP/DSN connectivity test (v1), scanning an open tool matrix
 
 **Bootstrap config**:
-Tiny per-student initial values collected up front (language, active course pack, optional short questions to seed the teaching profile). Bootstrap seeding may set absolute teaching-profile values; later profile updates use the normal per-proposal step cap. Adaptation continues via validated proposals — bootstrap is not a one-time global system setting.
+Tiny per-student initial values collected up front (language, **active course pack**, optional short questions to seed the teaching profile), stored with the learner in the **student-model store**. Bootstrap seeding may set absolute teaching-profile values; later profile updates use the normal per-proposal step cap. Active pack may change later between tutor loops via the harness set tool — bootstrap is not a one-time global system setting.
 _Avoid_: long intake questionnaire
