@@ -1,0 +1,3 @@
+# Raw SQL behind a small student-model store module
+
+The **student-model store** is accessed with raw SQL behind a small module whose interface is domain operations (load context, persist active pack, apply a validated proposal), not tables. SQLite stays the file form (ADR-0002). The driver is Node’s built-in `node:sqlite` (no native addon, no sql.js WASM) — still an implementation detail inside that module so a driver swap does not touch **tools**. Rejected: Prisma/ORM (would make table layout the public surface and fight placeholder columns for later slices), a query builder on day one, and `better-sqlite3`.

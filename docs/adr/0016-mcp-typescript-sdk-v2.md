@@ -1,0 +1,3 @@
+# MCP TypeScript SDK v2 over 2025-era stdio
+
+The **agent harness** speaks MCP via the official TypeScript SDK v2 (`@modelcontextprotocol/server`, `serveStdio`), with **tools** registered as a thin adapter over callable handlers. Wire protocol stays **2025-era** (initialize handshake) so Cursor works; do not opt into 2026-07-28-only until the operator’s **LLM client** speaks it. Tool `inputSchema`s are Zod (what v2 validates against). Tests still target handlers, not JSON-RPC framing (slice-1 spec). Rejected: v1 `@modelcontextprotocol/sdk` (maintenance line), hand-rolled JSON-RPC, HTTP/Express MCP adapters in this repo, and a first-party MCP client package in slice 1.
