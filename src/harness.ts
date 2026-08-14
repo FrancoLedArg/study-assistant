@@ -1,4 +1,11 @@
 import {
+  readCatedraSource,
+  searchCatedraSources,
+  sourcesRoot,
+  type ReadCatedraResult,
+  type SearchCatedraResult,
+} from "./catedra.ts";
+import {
   discoverCoursePacks,
   resolveActiveCoursePack,
   type CoursePack,
@@ -10,7 +17,12 @@ import {
   type StudentModelStore,
 } from "./student-model-store.ts";
 
-export type { CoursePack, LoadContextResult };
+export type {
+  CoursePack,
+  LoadContextResult,
+  ReadCatedraResult,
+  SearchCatedraResult,
+};
 
 export type HarnessOptions = {
   workspaceRoot: string;
@@ -31,6 +43,8 @@ export type Harness = {
   loadContext: () => Promise<LoadContextResult>;
   listCoursePacks: () => Promise<ListCoursePacksResult>;
   setActiveCoursePack: (packId: string) => Promise<SetActiveCoursePackResult>;
+  searchCatedra: (query: string) => Promise<SearchCatedraResult>;
+  readCatedra: (sourcePath: string) => Promise<ReadCatedraResult>;
   close: () => void;
 };
 
@@ -60,6 +74,15 @@ export function createHarness(options: HarnessOptions): Harness {
     return { packs, activeId: resolved.id };
   }
 
+  function activeSourcesDir(): string | null {
+    const studentStore = getStore();
+    const { activeId } = resolveActive(studentStore);
+    if (activeId === null) {
+      return null;
+    }
+    return sourcesRoot(options.workspaceRoot, activeId);
+  }
+
   return {
     async loadContext() {
       const studentStore = getStore();
@@ -79,6 +102,20 @@ export function createHarness(options: HarnessOptions): Harness {
       }
       studentStore.persistActivePack(packId);
       return { ok: true, active_course_pack_id: packId };
+    },
+    async searchCatedra(query) {
+      const sourcesDir = activeSourcesDir();
+      if (sourcesDir === null) {
+        return { ok: false, error: "no_active_course_pack" };
+      }
+      return { ok: true, hits: searchCatedraSources(sourcesDir, query) };
+    },
+    async readCatedra(sourcePath) {
+      const sourcesDir = activeSourcesDir();
+      if (sourcesDir === null) {
+        return { ok: false, error: "no_active_course_pack" };
+      }
+      return readCatedraSource(sourcesDir, sourcePath);
     },
     close() {
       store?.close();

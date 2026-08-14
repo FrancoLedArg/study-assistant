@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -61,6 +61,31 @@ async function writePack(
     path.join(packDir, "sources", "notes.md"),
     `# ${displayName}\n`,
     "utf8",
+  );
+}
+
+async function writeSource(
+  workspaceRoot: string,
+  packId: string,
+  relPath: string,
+  content: string,
+): Promise<void> {
+  const fullPath = path.join(
+    workspaceRoot,
+    "course-packs",
+    packId,
+    "sources",
+    relPath,
+  );
+  await mkdir(path.dirname(fullPath), { recursive: true });
+  await writeFile(fullPath, content, "utf8");
+}
+
+async function copyShippedDatabases(workspaceRoot: string): Promise<void> {
+  await cp(
+    path.join(import.meta.dirname, "..", "course-packs", "databases"),
+    path.join(workspaceRoot, "course-packs", "databases"),
+    { recursive: true },
   );
 }
 
@@ -357,5 +382,241 @@ describe("shipped Databases course pack", () => {
     expect(displayName.length).toBeGreaterThan(0);
     const sources = await readdir(path.join(packDir, "sources"));
     expect(sources.length).toBeGreaterThan(0);
+  });
+});
+
+describe("cátedra search and read", () => {
+  it("search_catedra finds relevant files in the Databases fixture sources/", async () => {
+    const fixture = await makeFixture();
+    await copyShippedDatabases(fixture.workspaceRoot);
+    const harness = openHarness(fixture);
+
+    const result = await harness.searchCatedra("clave primaria");
+
+    expect(result).toEqual({
+      ok: true,
+      hits: [
+        {
+          path: "01-modelo-relacional.md",
+          snippet: expect.stringMatching(/clave primaria/i),
+        },
+      ],
+    });
+  });
+
+  it("search_catedra returns no hits on a Databases fixture miss", async () => {
+    const fixture = await makeFixture();
+    await copyShippedDatabases(fixture.workspaceRoot);
+    const harness = openHarness(fixture);
+
+    const result = await harness.searchCatedra("quantum chromodynamics");
+
+    expect(result).toEqual({ ok: true, hits: [] });
+  });
+
+  it("read_catedra returns usable content for a known Databases fixture source", async () => {
+    const fixture = await makeFixture();
+    await copyShippedDatabases(fixture.workspaceRoot);
+    const harness = openHarness(fixture);
+
+    const result = await harness.readCatedra("01-modelo-relacional.md");
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.path).toBe("01-modelo-relacional.md");
+      expect(result.content).toContain("Notas de cátedra");
+      expect(result.content).toContain("clave primaria");
+    }
+  });
+
+  it("search_catedra finds relevant files under the active pack sources/", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    await writeSource(
+      fixture.workspaceRoot,
+      "databases",
+      "notes.md",
+      "# Modelo relacional\nUna relacion es un conjunto de tuplas.\n",
+    );
+    await writeSource(
+      fixture.workspaceRoot,
+      "databases",
+      "sql.md",
+      "# SQL\nSELECT from tables.\n",
+    );
+    const harness = openHarness(fixture);
+
+    const result = await harness.searchCatedra("tuplas");
+
+    expect(result).toEqual({
+      ok: true,
+      hits: [
+        {
+          path: "notes.md",
+          snippet: expect.stringMatching(/tuplas/i),
+        },
+      ],
+    });
+  });
+
+  it("search_catedra returns no hits on a cátedra miss", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    const harness = openHarness(fixture);
+
+    const result = await harness.searchCatedra("quantum chromodynamics");
+
+    expect(result).toEqual({ ok: true, hits: [] });
+  });
+
+  it("read_catedra returns the content of a known fixture source", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    await writeSource(
+      fixture.workspaceRoot,
+      "databases",
+      "notes.md",
+      "# Modelo relacional\nUna relacion es un conjunto de tuplas.\n",
+    );
+    const harness = openHarness(fixture);
+
+    const result = await harness.readCatedra("notes.md");
+
+    expect(result).toEqual({
+      ok: true,
+      path: "notes.md",
+      content: "# Modelo relacional\nUna relacion es un conjunto de tuplas.\n",
+    });
+  });
+
+  it("search_catedra does not search outside pack sources/", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    await writeFile(
+      path.join(fixture.workspaceRoot, "leaked.md"),
+      "SECRET_OUTSIDE_TOKEN\n",
+      "utf8",
+    );
+    await mkdir(
+      path.join(fixture.workspaceRoot, "course-packs", "databases", "teaching"),
+      { recursive: true },
+    );
+    await writeFile(
+      path.join(
+        fixture.workspaceRoot,
+        "course-packs",
+        "databases",
+        "teaching",
+        "notes.md",
+      ),
+      "SECRET_OUTSIDE_TOKEN\n",
+      "utf8",
+    );
+    const harness = openHarness(fixture);
+
+    const result = await harness.searchCatedra("SECRET_OUTSIDE_TOKEN");
+
+    expect(result).toEqual({ ok: true, hits: [] });
+  });
+
+  it("search_catedra does not search a sibling pack's sources/", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    await writePack(fixture.workspaceRoot, "algebra", "Algebra");
+    await writeSource(
+      fixture.workspaceRoot,
+      "algebra",
+      "notes.md",
+      "SECRET_SIBLING_TOKEN\n",
+    );
+    const harness = openHarness(fixture);
+    await harness.setActiveCoursePack("databases");
+
+    const result = await harness.searchCatedra("SECRET_SIBLING_TOKEN");
+
+    expect(result).toEqual({ ok: true, hits: [] });
+  });
+
+  it("read_catedra refuses paths outside pack sources/", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    const harness = openHarness(fixture);
+
+    const parent = await harness.readCatedra("../pack.yaml");
+    const escaped = await harness.readCatedra("../../leaked.md");
+    const absolute = await harness.readCatedra("/etc/passwd");
+
+    expect(parent).toEqual({
+      ok: false,
+      error: "outside_sources",
+      path: "../pack.yaml",
+    });
+    expect(escaped).toEqual({
+      ok: false,
+      error: "outside_sources",
+      path: "../../leaked.md",
+    });
+    expect(absolute).toEqual({
+      ok: false,
+      error: "outside_sources",
+      path: "/etc/passwd",
+    });
+  });
+
+  it("read_catedra reports not_found for a missing source", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    const harness = openHarness(fixture);
+
+    const result = await harness.readCatedra("missing.md");
+
+    expect(result).toEqual({
+      ok: false,
+      error: "not_found",
+      path: "missing.md",
+    });
+  });
+
+  it("search_catedra finds nested sources by relative path", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    await writeSource(
+      fixture.workspaceRoot,
+      "databases",
+      "topics/sql.md",
+      "Consultas SELECT sobre tablas.\n",
+    );
+    const harness = openHarness(fixture);
+
+    const found = await harness.searchCatedra("SELECT");
+    const read = await harness.readCatedra("topics/sql.md");
+
+    expect(found).toEqual({
+      ok: true,
+      hits: [
+        {
+          path: "topics/sql.md",
+          snippet: expect.stringMatching(/SELECT/),
+        },
+      ],
+    });
+    expect(read).toEqual({
+      ok: true,
+      path: "topics/sql.md",
+      content: "Consultas SELECT sobre tablas.\n",
+    });
+  });
+
+  it("search_catedra and read_catedra refuse when there is no active course pack", async () => {
+    const fixture = await makeFixture();
+    await writePack(fixture.workspaceRoot, "databases", "Databases");
+    await writePack(fixture.workspaceRoot, "algebra", "Algebra");
+    const harness = openHarness(fixture);
+
+    const search = await harness.searchCatedra("tuplas");
+    const read = await harness.readCatedra("notes.md");
+
+    expect(search).toEqual({ ok: false, error: "no_active_course_pack" });
+    expect(read).toEqual({ ok: false, error: "no_active_course_pack" });
   });
 });
