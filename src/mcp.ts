@@ -53,5 +53,40 @@ export function createStudyOsServer(options: HarnessOptions = {
     },
   );
 
+  server.registerTool(
+    "search_catedra",
+    {
+      title: "Search cátedra",
+      description:
+        "Search cátedra sources under the active course pack's sources/ only. Does not search the web or files outside sources/.",
+      inputSchema: z.object({
+        query: z.string().min(1).describe("Text to find in cátedra sources"),
+      }),
+    },
+    async ({ query }) => {
+      const result = await harness.searchCatedra(query);
+      return jsonResult(result, result.ok === false);
+    },
+  );
+
+  server.registerTool(
+    "read_catedra",
+    {
+      title: "Read cátedra",
+      description:
+        "Read a cátedra source file from the active course pack's sources/. Path is relative to sources/; paths outside that directory are refused.",
+      inputSchema: z.object({
+        path: z
+          .string()
+          .min(1)
+          .describe("Path relative to the active pack sources/ directory"),
+      }),
+    },
+    async ({ path }) => {
+      const result = await harness.readCatedra(path);
+      return jsonResult(result, result.ok === false);
+    },
+  );
+
   return server;
 }
